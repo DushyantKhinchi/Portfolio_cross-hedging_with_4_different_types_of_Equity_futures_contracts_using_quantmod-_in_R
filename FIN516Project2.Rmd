@@ -1,0 +1,242 @@
+---
+title: "FIN516Project2"
+author: "Dushyant Singh Khinchi"
+date: "3/7/2020"
+output: html_document
+---
+
+```{r}
+
+library(quantmod)
+
+y <- read.csv("D:/FIN 516 Derivatives/Project 2/EqFutS20.csv")
+# You may need to change formating depending on how your computer reads the date
+
+y$Date <- as.Date(y$Date,'%Y-%m-%d')
+
+# Convert to an xts object
+y <- xts(y[,-1],order.by=y[,1])
+
+# Seperate the futures from equity prices
+
+
+z <- y[,1:4]
+eq <- y[,5:ncol(y)]
+
+View(z)
+View(eq)
+# Create the portfolio where each stock position was equally weighted 1/4/2018
+z$port <- eq %*% as.vector( (1/ncol(eq)) / eq[1,])  #here %*% meansmatrix multiplication
+
+View(z$port)
+
+# Portfolio value on 2/10/2020
+port <- 250e6 * as.numeric(z$port[nrow(z)])
+
+# Compute log first-differences for futures prices and portfolio value
+z <- na.omit(diff(log(z)))
+port
+
+
+sd(z$port)
+sd(z$port)*port
+
+
+```
+
+ Daily standard deviation of returns for the portfolio: 0.01154735
+ 
+ Dollar amount of the daily standard deviation of returns for the portfolio: $4768936
+ 
+ 
+```{r}
+es <- lm(z$port~z$ES)
+coef(es)
+
+es.beta <- coef(es)[2]
+es.beta
+
+es.r2 <- summary(es)$r.squared
+es.r2
+
+#correlation coefficient
+sqrt(es.r2)
+
+summary(es)
+
+#Risk reduction factor
+1-sqrt(1-es.r2)
+
+#daily standard deviation of hedged returns
+sd(z$port)*sqrt(1-es.r2)
+
+
+#daily standard deviation of hedged returns by dollar value
+sd(z$port)*port*sqrt(1-es.r2)
+
+#Varience minimizing number of contracts
+N<-port/(50*3338)
+
+#Adjusted for difference in beta
+N*es.beta
+
+```
+Beta for ES = 1.0505
+
+correlation coefficient for ES = 0.8919
+
+Risk reduction factor for ES = 0.5478
+
+Variance minimizing number of contracts for ES as hedging instrument: 2600
+
+Daily standard deviation of hedged returns by ES contract: 0.0052
+
+Dollar value of daily standard deviation of hedged returns by ES:  $2156392
+
+```{r}
+nq <- lm(z$port~z$NQ)
+coef(nq)
+
+nq.beta <- coef(nq)[2]
+nq.beta
+
+nq.r2 <- summary(nq)$r.squared
+nq.r2
+
+summary(nq)
+
+#correlation coefficient
+sqrt(nq.r2)
+
+#Risk reduction factor
+1-sqrt(1-nq.r2)
+
+
+#daily standard deviation of hedged returns
+sd(z$port)*sqrt(1-nq.r2)
+
+#daily standard deviation of hedged returns by dollar value
+sd(z$port)*port*sqrt(1-nq.r2)
+
+
+#Varience minimizing number of contracts
+
+N<-port/(20*9460)
+
+#Adjusted for difference in beta
+
+N*nq.beta
+
+
+
+```
+Beta for NQ = 0.8248
+
+Correlation coefficient for NQ = 0.9027
+
+Risk reduction factor for NQ =  0.5698
+
+Variance minimizing number of contracts for NQ as hedging instrument: 1801
+
+Daily standard deviation of hedged returns by NQ contract: 0.0049
+
+Dollar value of daily standard deviation of hedged returns by NQ: $2051334
+
+```{r}
+rty <- lm(z$port~z$RTY)
+coef(rty)
+
+rty.beta <- coef(rty)[2]
+rty.beta
+
+rty.r2 <- summary(rty)$r.squared
+rty.r2
+
+summary(rty)
+
+#correlation coefficient
+sqrt(rty.r2)
+
+#Risk reduction factor
+1-sqrt(1-rty.r2)
+
+
+#daily standard deviation of hedged returns
+sd(z$port)*sqrt(1-rty.r2)
+
+
+#daily standard deviation of hedged returns by dollar value
+sd(z$port)*port*sqrt(1-rty.r2)
+
+
+#Varience minimizing number of contracts
+
+N<-port/(50*1660)
+
+#Adjusted for difference in beta
+N*rty.beta
+
+
+
+
+```
+Beta for RTY = 0.8743
+
+Correlation coefficient for RTY = 0.8496
+
+Risk reduction factor for RTY= 0.4726
+
+Variance minimizing number of contracts for RTY as hedging instrument: 4351
+
+Daily standard deviation of hedged returns by RTY: 0.0060
+
+Dollar value of daily standard deviation of hedged returns by RTY: $2514773
+
+```{r}
+ixt <- lm(z$port~z$IXT)
+coef(ixt)
+
+ixt.beta <- coef(ixt)[2]
+ixt.beta
+
+ixt.r2 <- summary(ixt)$r.squared
+ixt.r2
+
+summary(ixt)
+
+#correlation coefficient
+sqrt(ixt.r2)
+
+#Risk reduction factor
+1-sqrt(1-ixt.r2)
+
+
+#daily standard deviation of hedged returns
+sd(z$port)*sqrt(1-ixt.r2)
+
+#daily standard deviation of hedged returns by dollar value
+sd(z$port)*port*sqrt(1-ixt.r2)
+
+#Varience minimizing number of contracts
+N<-port/(100*1008)
+
+#Adjusted for difference in beta
+N*ixt.beta
+
+
+
+```
+Beta for IXT = 0.7995
+
+Correlation coefficient for IXT = 0.9082
+
+Risk reduction factor for IXT = 0.5815
+
+Variance minimizing number of contracts for IXT as hedging instrument: 3276
+
+Daily standard deviation of hedged returns by IXT contract: 0.0048
+
+Dollar value of daily standard deviation of hedged returns by IXT: $1995794
+
+
+(f) IXT(E-mini Technology Select Sector) contract should be used for variance-minimizing cross hedge as it offers least risk among all the four contracts with a daily standard deviation of 0.00483
