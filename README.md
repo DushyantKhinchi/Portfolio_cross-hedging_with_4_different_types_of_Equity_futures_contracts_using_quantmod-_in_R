@@ -1,0 +1,1 @@
+# Portfolio_cross-hedging_with_4_different_types_of_Equity_futures_contracts_using_quantmod-_in_R
